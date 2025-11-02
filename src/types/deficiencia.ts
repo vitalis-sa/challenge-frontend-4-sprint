@@ -1,0 +1,1 @@
+export type Deficiencia = 'NENHUMA' | 'FISICA' | 'VISUAL' | 'AUDITIVA';
