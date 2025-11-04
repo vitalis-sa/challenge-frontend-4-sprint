@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useCallback, useState, useContext } from "react";
 import type { Paciente } from "../types/paciente";
 import type { PacienteFormData } from "../schemas/paciente-schema";

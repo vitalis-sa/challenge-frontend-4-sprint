@@ -1,3 +1,4 @@
+/* eslint-disable no-irregular-whitespace */
 import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { NotFound } from "./pages/not-found"
 import { lazy, Suspense } from "react"
