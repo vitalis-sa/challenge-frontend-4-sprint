@@ -153,7 +153,7 @@ export function PacienteForm() {
           Selecione...
         </option>
         {/* --- VALORES ATUALIZADOS (Nomes do Enum) --- */}
-        <option value="SEM DEF">Nenhuma (Sem Def.)</option>
+        <option value="NENHUMA">Nenhuma (Sem Def.)</option>
         <option value="MOTORA">Motora</option>
         <option value="INTELECTUAL">Intelectual</option>
       </select>

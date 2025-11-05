@@ -38,7 +38,7 @@ export const pacienteSchema = z.object({
     .max(40, "Escolaridade deve ter no máximo 40 caracteres"),
 
   // 6. TP_DEFICIENCIA (VARCHAR - ex: "MOTORA", "SEM DEF")
-  deficiencia: z.enum(["SEM DEF", "MOTORA", "INTELECTUAL"], { 
+  deficiencia: z.enum(["NENHUMA", "MOTORA", "INTELECTUAL"], { 
       message: "Selecione o tipo de deficiência" 
   }),
 
