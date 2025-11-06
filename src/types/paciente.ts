@@ -10,4 +10,6 @@ export interface Paciente {
   escolaridade: string;
   classificacao: number | null; // O campo era Integer no DTO, então pode ser nulo
   deficiencia: Deficiencia;
+  dsAcompanhante:string
+  nrPorcentagemFalta: number
 }

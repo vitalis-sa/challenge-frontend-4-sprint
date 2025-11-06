@@ -4,23 +4,51 @@ import atende_mais from "../assets/atende+.png";
 
 export function Header() {
   const [open, setOpen] = useState(false);
-  const location = useLocation();
+  const location = useLocation(); 
 
-  const links = [
+  // 1. Defina quais são os links públicos (do Paciente)
+  const linksPaciente = [
     { to: "/", label: "Home" },
     { to: "/about", label: "Sobre" },
     { to: "/integrantes", label: "Integrantes" },
     { to: "/faq", label: "FAQ" },
-    { to: "/login", label: "Login" },
-    { to: "/cadastrar", label: "Cadastrar" },
     { to: "/teste", label: "Teste" },
-    { to: "/contato", label: "Contato" },
+    { to: "/contato", label: "Contato" }
   ];
+
+  // 2. Defina quais são os links da área do Médico
+  // (Baseado nas rotas que você criou no App.tsx)
+  const linksMedico = [
+    { to: "/pacientes", label: "Pacientes" }, // A lista de pacientes
+    { to: "/cadastrar", label: "Cadastrar Paciente" }, // Rota do SignUp
+    { to: "/consultas/cadastro", label: "Agendar Consulta" },
+  ];
+
+  // 3. Verifique se estamos na área do Médico
+  // Se a URL começar com qualquer uma dessas, é a área do médico.
+  const rotasMedico = ["/pacientes", "/cadastrar", "/consultas"];
+  const isAreaMedico = rotasMedico.some((rota) => 
+    location.pathname.startsWith(rota)
+  );
+
+  // 4. Decida qual conjunto de links usar
+  const links = isAreaMedico ? linksMedico : linksPaciente;
+
+  // 5. Função para fechar o menu mobile ao clicar em um link
+  const handleLinkClick = () => {
+    setOpen(false);
+  };
+
+  // --- FIM DA LÓGICA ---
 
   return (
     <nav className="bg-roxo-escuro shadow w-full h-[80px] flex items-center px-5 md:px-8">
-      {/* Logo */}
-      <Link to="/" className="flex items-center gap-2 text-amarelo-claro hover:opacity-80">
+      {/* Logo (sempre leva para a Home) */}
+      <Link 
+        to="/" 
+        className="flex items-center gap-2 text-amarelo-claro hover:opacity-80"
+        onClick={handleLinkClick} // Fecha o menu se estiver aberto
+      >
         <img src={atende_mais} alt="Logo do projeto" className="max-w-[110px] h-auto" />
       </Link>
 
@@ -58,11 +86,6 @@ export function Header() {
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d={
-              open
-                ? "M6 18L18 6M6 6l12 12"
-                : "M4 6h16M4 12h16M4 18h16"
-            }
           />
         </svg>
       </button>
@@ -76,6 +99,7 @@ export function Header() {
               <Link
                 key={link.to}
                 to={link.to}
+                onClick={handleLinkClick} // Adicionado aqui também
                 className={`font-medium text-lg text-amarelo-claro hover:opacity-80 ${
                   isActive ? "border-b border-rosa-claro text-rosa-claro" : ""
                 }`}
