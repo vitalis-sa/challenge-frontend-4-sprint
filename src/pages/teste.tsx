@@ -6,7 +6,8 @@ import { MicTest } from "../components/mictest";
 import { CameraTest } from "../components/cameratest";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
-import { WatsonChat } from "../components/watson";
+
+
 
 type MicDevice = {
   deviceId: string;
@@ -494,7 +495,6 @@ export function Teste() {
         </div>
       </div>
       <Footer />
-      <WatsonChat />
     </>
   );
 

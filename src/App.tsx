@@ -4,6 +4,7 @@ import { NotFound } from "./pages/not-found"
 import { lazy, Suspense } from "react"
 import { Loading } from "./components/loading"
 import { PacientesProvider } from "./context/PacienteContext"
+import { DialogflowChat } from "./components/vitas"
 
 function App() {
 
@@ -46,32 +47,30 @@ const PacientesPage = lazy(() =>
 
 
 return (
-    <BrowserRouter>
-      {/* 2. Envolva o Suspense (e as Routes) com o Provider */}
-      <PacientesProvider>
-        <Suspense fallback={<Loading />}>
-          <Routes>
-            <Route>
-              <Route index element={<Home />} />
-              <Route path="/integrantes" element={<Integrantes />} />
-              <Route path="/" element={<Home />} />
-              <Route path="/contato" element={<Contato />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/cadastrar" element={<SignUp />} />
-              <Route path="/teste" element={<Teste />} />
-              <Route path="/faq/:id?" element={<Faq />} />
-              <Route path="/about" element={<About />} />
-              
-              {/* Agora esta rota funcionará */}
-              <Route path="/pacientes" element={<PacientesPage />} />
-              
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </PacientesProvider> {/* 3. Feche o Provider */}
-    </BrowserRouter>
-  )
+  <BrowserRouter>
+    <PacientesProvider>
+      {/* Chatbot sempre disponível */}
+      <DialogflowChat />
+      <Suspense fallback={<Loading />}>
+        <Routes>
+          <Route>
+            <Route index element={<Home />} />
+            <Route path="/integrantes" element={<Integrantes />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/contato" element={<Contato />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/cadastrar" element={<SignUp />} />
+            <Route path="/teste" element={<Teste />} />
+            <Route path="/faq/:id?" element={<Faq />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/pacientes" element={<PacientesPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </Suspense>
+    </PacientesProvider>
+  </BrowserRouter>
+);
 }
 
 export default App
