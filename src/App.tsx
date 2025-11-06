@@ -6,6 +6,7 @@ import { Loading } from "./components/loading"
 
 // 1. IMPORTAR OS DOIS PROVIDERS
 import { PacientesProvider } from "./context/PacienteContext"
+import { DialogflowChat } from "./components/vitas"
 import { ConsultasProvider } from "./context/ConsultaContext" // <-- ADICIONADO
 
 function App() {
@@ -60,6 +61,7 @@ const CadastroConsultaPage = lazy(() =>
 return (
     <BrowserRouter>
       <PacientesProvider>
+        <DialogflowChat />
         <ConsultasProvider> {/* <-- ADICIONADO */}
           <Suspense fallback={<Loading />}>
             <Routes>
