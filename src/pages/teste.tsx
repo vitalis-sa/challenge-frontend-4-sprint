@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useEffect, useRef, useState } from "react";
 import "../index.css";
 import * as faceapi from "face-api.js";
@@ -6,7 +7,9 @@ import { MicTest } from "../components/mictest";
 import { CameraTest } from "../components/cameratest";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
-
+import { useAuth } from "../context/AuthContext"; 
+import { Link, useNavigate } from "react-router-dom"; // <-- 1. ADICIONADO useNavigate
+import { useTestes } from "../context/TesteContext"; // <-- 2. IMPORTADO useTestes
 
 
 type MicDevice = {
@@ -37,6 +40,7 @@ type Results = {
     recordedBlobSize?: number;
     deviceLabel?: string;
     status?: TestStatus;
+    audioUrl?: string; // (Mantive este, pois estava no seu código original)
   };
   faces?: number;
   timestamp: string;
@@ -46,6 +50,11 @@ export function Teste() {
   const [step, setStep] = useState<"connectivity" | "camera" | "mic" | "done">("connectivity");
   const [busy, setBusy] = useState(false);
   const [results, setResults] = useState<Results>({ timestamp: new Date().toISOString() });
+
+  const { user } = useAuth();
+  const { saveTeste } = useTestes(); // <-- 3. DECLARADO 'saveTeste'
+  const navigate = useNavigate(); // <-- 4. DECLARADO 'navigate'
+  const [isSaving, setIsSaving] = useState(false); // <-- 5. DECLARADO 'isSaving'
 
   // Camera refs
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -67,8 +76,8 @@ export function Teste() {
   const rafRef = useRef<number | null>(null);
   const recordedChunksRef = useRef<Blob[]>([]);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-
-
+  const detectionIntervalRef = useRef<number | null>(null);
+  const maxLevelRef = useRef(0);
 
 
   // --- CAMERA TEST ---
@@ -116,7 +125,6 @@ export function Teste() {
       try { videoRef.current.pause(); videoRef.current.srcObject = null; } catch { }
     }
   }
-  const detectionIntervalRef = useRef<number | null>(null);
 
   async function initFaceDetection() {
     await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
@@ -142,8 +150,6 @@ export function Teste() {
   }
 
   // --- MICROPHONE FUNCTIONS ---
-
-  const maxLevelRef = useRef(0);
 
   async function enumerateMics() {
     try {
@@ -305,6 +311,47 @@ export function Teste() {
     URL.revokeObjectURL(url);
   }
 
+  // --- NOVA FUNÇÃO PARA SALVAR OS RESULTADOS ---
+  async function handleSalvarResultados() {
+    if (!user) {
+      alert("Erro: Paciente não está logado. Não é possível salvar.");
+      return;
+    }
+
+    setIsSaving(true);
+    
+    // Mapeia o 'results' do frontend para o DTO do backend
+    const payload = {
+      idPaciente: user.id, // Adiciona o ID do paciente logado
+      
+      // Mapeia o objeto de conectividade (se existir)
+      connectivity: results.connectivity
+        ? { status: results.connectivity.status || "failure" }
+        : undefined,
+        
+      // Mapeia o objeto de câmera (se existir)
+      camera: results.camera
+        ? { status: results.camera.status || "failure" }
+        : undefined,
+        
+      // Mapeia o objeto de microfone (se existir)
+      mic: results.mic
+        ? { status: results.mic.status || "failure" }
+        : undefined,
+    };
+
+    try {
+      await saveTeste(payload);
+      alert("Resultados do teste salvos com sucesso!");
+      navigate("/pacientes"); // Opcional: redireciona para a lista
+    } catch (error) {
+      console.error("Erro ao salvar resultados do teste:", error);
+      alert("Falha ao salvar os resultados. Tente novamente.");
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
   // --- RENDER ---
   const pct = Math.min(level * 300, 100);
 
@@ -319,6 +366,21 @@ export function Teste() {
       <Header />
       <div className="min-h-screen flex flex-col items-center justify-start bg-bg-clarinho p-8">
         <div className="w-full max-w-4xl">
+          {user ? (
+            <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-800 rounded-lg shadow-sm flex items-center gap-3">
+              <span className="text-2xl">👋</span>
+              <div>
+                <span className="font-semibold">Olá, {user.nome}!</span>
+                <p className="text-sm">Você está logado e pronto para iniciar seus testes.</p>
+              </div>
+            </div>
+          ) : (
+            <div className="mb-6 p-4 bg-yellow-100 border border-yellow-300 text-yellow-800 rounded-lg shadow-sm">
+              <span className="font-semibold">Atenção:</span> Você não está logado. 
+              Os resultados dos testes não serão salvos. 
+              Por favor, <Link to="/login" className="font-bold underline">faça o login</Link> para continuar.
+            </div>
+          )}
           <h1 className="text-2xl font-bold text-roxo-escuro mb-4">
             Teste de conectividade e periféricos
           </h1>
@@ -332,8 +394,8 @@ export function Teste() {
             <div className="flex flex-wrap items-center gap-2 md:gap-4 mb-4">
               <button
                 className={`px-3 py-1 rounded w-full sm:w-auto ${step === "connectivity"
-                  ? "bg-verde-escuro text-white"
-                  : "bg-quase-branco"
+                    ? "bg-verde-escuro text-white"
+                    : "bg-quase-branco"
                   }`}
                 onClick={() => setStep("connectivity")}
               >
@@ -341,8 +403,8 @@ export function Teste() {
               </button>
               <button
                 className={`px-3 py-1 rounded w-full sm:w-auto ${step === "camera"
-                  ? "bg-verde-escuro text-white"
-                  : "bg-quase-branco"
+                    ? "bg-verde-escuro text-white"
+                    : "bg-quase-branco"
                   }`}
                 onClick={() => setStep("camera")}
               >
@@ -350,8 +412,8 @@ export function Teste() {
               </button>
               <button
                 className={`px-3 py-1 rounded w-full sm:w-auto ${step === "mic"
-                  ? "bg-verde-escuro text-white"
-                  : "bg-quase-branco"
+                    ? "bg-verde-escuro text-white"
+                    : "bg-quase-branco"
                   }`}
                 onClick={() => setStep("mic")}
               >
@@ -361,54 +423,62 @@ export function Teste() {
                 Status: {busy ? "Executando..." : "Pronto"}
               </div>
             </div>
-
-            {step === "connectivity" && (
-              <div>
-                <NetworkTest
-                  onFinish={({ downloadMbps, uploadMbps, prepDuration, status }) => {
-                    setResults((prev) => ({
-                      ...prev,
-                      connectivity: {
-                        downloadKbps: downloadMbps ? Math.round(downloadMbps * 1000 / 8) : undefined,
-                        details: `Download: ${downloadMbps ?? '-'} Mbps, Upload: ${uploadMbps ?? '-'} Mbps, Prep: ${prepDuration?.toFixed(2) ?? '-'}s`,
-                        status: status ?? ((downloadMbps && downloadMbps >= 25 && uploadMbps && uploadMbps >= 3) ? "success" : "failure"),
-                      },
-                    }));
-                    setStep("camera");
-                  }}
-                />
+            
+            {!user ? (
+              <div className="text-center p-8 text-gray-600">
+                <p>Por favor, faça o login para habilitar os testes.</p>
               </div>
-            )}
+            ) : (
+              <>
+                {step === "connectivity" && (
+                  <div>
+                    <NetworkTest
+                      onFinish={({ downloadMbps, uploadMbps, prepDuration, status }) => {
+                        setResults((prev) => ({
+                          ...prev,
+                          connectivity: {
+                            downloadKbps: downloadMbps ? Math.round(downloadMbps * 1000 / 8) : undefined,
+                            details: `Download: ${downloadMbps ?? '-'} Mbps, Upload: ${uploadMbps ?? '-'} Mbps, Prep: ${prepDuration?.toFixed(2) ?? '-'}s`,
+                            status: status ?? ((downloadMbps && downloadMbps >= 25 && uploadMbps && uploadMbps >= 3) ? "success" : "failure"),
+                          },
+                        }));
+                        setStep("camera");
+                      }}
+                    />
+                  </div>
+                )}
 
-            {step === "camera" && (
-              <CameraTest
-                busy={busy}
-                results={results}
-                setResults={setResults}
-                startCamera={startCamera}
-                stopCamera={stopCamera}
-                videoRef={videoRef}
-                renderStatus={renderStatus}
-                setStep={setStep}
-              />
-            )}
+                {step === "camera" && (
+                  <CameraTest
+                    busy={busy}
+                    results={results}
+                    setResults={setResults}
+                    startCamera={startCamera}
+                    stopCamera={stopCamera}
+                    videoRef={videoRef}
+                    renderStatus={renderStatus}
+                    setStep={setStep}
+                  />
+                )}
 
-            {step === "mic" && (
-              <MicTest
-                busy={busy}
-                micError={micError}
-                micDevices={micDevices}
-                selectedMic={selectedMic}
-                setSelectedMic={setSelectedMic}
-                requestPermissionAndList={requestPermissionAndList}
-                enumerateMics={enumerateMics}
-                listening={listening}
-                startListening={startListening}
-                stopListening={stopListening}
-                results={results}
-                renderStatus={renderStatus}
-                setStep={setStep}
-              />
+                {step === "mic" && (
+                  <MicTest
+                    busy={busy}
+                    micError={micError}
+                    micDevices={micDevices}
+                    selectedMic={selectedMic}
+                    setSelectedMic={setSelectedMic}
+                    requestPermissionAndList={requestPermissionAndList}
+                    enumerateMics={enumerateMics}
+                    listening={listening}
+                    startListening={startListening}
+                    stopListening={stopListening}
+                    results={results}
+                    renderStatus={renderStatus}
+                    setStep={setStep}
+                  />
+                )}
+              </>
             )}
 
             {/* --- DONE --- */}
@@ -422,13 +492,11 @@ export function Teste() {
                     <h3 className="font-semibold text-roxo-escuro">Conectividade</h3>
                     {results.connectivity ? (
                       <p>
-                        Latência de <b>{results.connectivity.pingMs} ms</b>, velocidade de
-                        download <b>{results.connectivity.downloadKbps} kbps</b> (
-                        {results.connectivity.downloadBytes} bytes).
                         Status:{" "}
                         {results.connectivity.status === "success"
                           ? "✅ Conexão estável"
                           : "❌ Problemas detectados"}
+                        <span className="text-xs text-gray-500"> ({results.connectivity.details})</span>
                       </p>
                     ) : (
                       <p>Não foi realizado.</p>
@@ -440,10 +508,12 @@ export function Teste() {
                     <h3 className="font-semibold text-roxo-escuro">Câmera</h3>
                     {results.camera ? (
                       <p>
-                        Dispositivo: <b>{results.camera.deviceLabel ?? "Não identificado"}</b>,
-                        resolução <b>{results.camera.resolution?.width} x {results.camera.resolution?.height}</b>.
+                        Status:{" "}
+                        {results.camera.status === "success"
+                          ? "✅ Câmera funcionando."
+                          : "❌ Câmera não detectada."}
                         {results.faces && results.faces > 0 ? (
-                          <> Foram detectados <b>{results.faces}</b> rosto(s). ✅</>
+                          <> Detectado <b>{results.faces}</b> rosto(s). ✅</>
                         ) : (
                           <> Nenhum rosto detectado. ❌</>
                         )}
@@ -458,10 +528,7 @@ export function Teste() {
                     <h3 className="font-semibold text-roxo-escuro">Microfone</h3>
                     {results.mic ? (
                       <p>
-                        Dispositivo: <b>{results.mic.deviceLabel ?? "Não identificado"}</b>.{" "}
-                        Última gravação com tamanho de <b>{results.mic.recordedBlobSize} bytes</b>.
-                        Nível de áudio máximo detectado:{" "}
-                        <b>{(results.mic.rms ?? 0).toFixed(3)}</b>.{" "}
+                        Status:{" "}
                         {results.mic.status === "success"
                           ? "✅ Captação de áudio bem-sucedida."
                           : "❌ Não foi detectado áudio."}
@@ -472,12 +539,16 @@ export function Teste() {
                   </div>
 
                   <div className="mt-4 flex flex-wrap gap-3">
+                    {/* Botão para SALVAR na API */}
                     <button
-                      onClick={downloadResults}
-                      className="px-3 py-2 rounded bg-verde-escuro text-white w-full sm:w-auto"
+                      onClick={handleSalvarResultados}
+                      disabled={!user || isSaving} // Desabilitado se não houver user ou se estiver salvando
+                      className="px-3 py-2 rounded bg-verde-escuro text-white w-full sm:w-auto disabled:opacity-50"
                     >
-                      Baixar relatório (JSON)
+                      {isSaving ? "Salvando..." : "Salvar Resultados"}
                     </button>
+
+                    {/* Botão de Reiniciar */}
                     <button
                       onClick={() => {
                         setStep("connectivity");
@@ -486,6 +557,14 @@ export function Teste() {
                       className="px-3 py-2 rounded border w-full sm:w-auto"
                     >
                       Reiniciar testes
+                    </button>
+
+                    {/* Botão de Download (opcional) */}
+                    <button
+                      onClick={downloadResults}
+                      className="px-3 py-2 rounded border border-gray-300 text-sm text-gray-600 w-full sm:w-auto"
+                    >
+                      Baixar relatório (JSON)
                     </button>
                   </div>
                 </div>

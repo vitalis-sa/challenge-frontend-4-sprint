@@ -13,6 +13,7 @@ export function Header() {
     { to: "/integrantes", label: "Integrantes" },
     { to: "/faq", label: "FAQ" },
     { to: "/teste", label: "Teste" },
+    { to: "/login", label: "Login" },
     { to: "/contato", label: "Contato" }
   ];
 
