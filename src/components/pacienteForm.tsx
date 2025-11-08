@@ -183,28 +183,6 @@ export function PacienteForm() {
         <p className="text-red-500 text-sm">{errors.dsAcompanhante.message}</p>
       )}
 
-      {/* Classificação (NR_CLASSIFICACAO) - Opcional */}
-      <label
-        htmlFor="classificacao"
-        className="font-semibold text-roxo-escuro"
-      >
-        Classificação (1-5, opcional)
-      </label>
-      <input
-        type="number"
-        id="classificacao"
-        placeholder="Ex: 2"
-        min={1}
-        max={5}
-        className={`${inputBaseClass} ${
-          errors.classificacao ? inputErrorClass : inputValidClass
-        }`}
-        {...register("classificacao", { valueAsNumber: true })}
-      />
-      {errors.classificacao && (
-        <p className="text-red-500 text-sm">{errors.classificacao.message}</p>
-      )}
-
       {/* Porcentagem Falta (NR_PORCENTAGEM_FALTA) - Opcional */}
       <label
         htmlFor="nrPorcentagemFalta"

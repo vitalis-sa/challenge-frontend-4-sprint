@@ -101,6 +101,65 @@ export function PacienteDetalhePage() {
     timeZone: 'UTC'
   });
 
+  // --- NOVA FUNÇÃO 1: Lógica para a badge de Classificação ---
+  const getClassificacaoBadge = (classificacao: number | null) => {
+    // Assume 3 (Neutro) se for nulo, como no seu backend
+    const value = classificacao || 3; 
+    let className = "bg-gray-100 text-gray-800";
+    let text = `Neutro (${value})`;
+
+    switch (value) {
+      case 1:
+        className = "bg-red-100 text-red-800";
+        text = `Muito Ruim (${value})`;
+        break;
+      case 2:
+        className = "bg-orange-100 text-orange-800";
+        text = `Ruim (${value})`;
+        break;
+      case 3:
+        // A classe/texto padrão já é "Neutro (3)"
+        break;
+      case 4:
+        className = "bg-green-100 text-green-800";
+        text = `Bom (${value})`;
+        break;
+      case 5:
+        className = "bg-blue-100 text-blue-800";
+        text = `Excelente (${value})`;
+        break;
+    }
+
+    // Retorna o JSX da badge
+    return (
+      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${className}`}>
+        {text}
+      </span>
+    );
+  };
+
+  // --- NOVA FUNÇÃO 2: Lógica para a badge de Probabilidade de Falta ---
+  const getFaltaBadge = (porcentagem: number | null) => {
+    const value = porcentagem || 0;
+    let className = "bg-green-100 text-green-800"; // Baixo (Bom)
+    let text = `Baixa (${value}%)`;
+
+    if (value > 33 && value <= 66) {
+      className = "bg-yellow-100 text-yellow-800"; // Média (Atenção)
+      text = `Média (${value}%)`;
+    } else if (value > 66) {
+      className = "bg-red-100 text-red-800"; // Alta (Ruim)
+      text = `Alta (${value}%)`;
+    }
+
+    return (
+      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${className}`}>
+        {text}
+      </span>
+    );
+  };
+
+
   return (
     <>
       <Header />
@@ -109,29 +168,36 @@ export function PacienteDetalhePage() {
         {/* --- Card de Informações do Paciente --- */}
         <section className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h1 className="text-3xl font-bold text-roxo-escuro mb-4">{paciente.nome}</h1>
-          {/* O (grid) com as infos do paciente continua aqui */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2">
-           <InfoItem label="CPF" value={paciente.cpf} />
+          
+          {/* --- GRID DE INFORMAÇÕES ATUALIZADA --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
+            <InfoItem label="CPF" value={paciente.cpf} />
             <InfoItem label="Data de Nascimento" value={dataNascFormatada} />
             <InfoItem label="Gênero" value={paciente.genero === 'F' ? 'Feminino' : 'Masculino'} />
             <InfoItem label="Escolaridade" value={paciente.escolaridade} />
             <InfoItem label="Deficiência" value={paciente.deficiencia} />
-            <InfoItem label="Classificação" value={paciente.classificacao || 'N/A'} />
-            <InfoItem label="Tem acompanhante?" value={paciente.dsAcompanhante || 'N/A'} />
-            <InfoItem label="Probabilidade de falta (%)" value={paciente.nrPorcentagemFalta || 'N/A'} />
+            <InfoItem label="Tem acompanhante?" value={paciente.dsAcompanhante === 'S' ? 'Sim' : 'Não'} />
+
+            {/* --- ITENS ATUALIZADOS COM AS BADGES --- */}
+            <InfoItem 
+              label="Classificação" 
+              value={getClassificacaoBadge(paciente.classificacao)} 
+            />
+            <InfoItem 
+              label="Probabilidade de falta" 
+              value={getFaltaBadge(paciente.nrPorcentagemFalta)} 
+            />
           </div>
         </section>
 
         {/* --- Seção de Consultas --- */}
         <section>
           
-          {/* 2. ADICIONADO: Flex container para o Título e o Botão */}
           <div className="flex flex-wrap justify-between items-center mb-4 gap-4">
             <h2 className="text-2xl font-bold text-roxo-escuro">
               Histórico de Consultas
             </h2>
             
-            {/* 3. ADICIONADO: O botão/link */}
             <Link
               to="/consultas/cadastro"
               className="flex items-center gap-2 px-4 py-2 rounded-lg bg-quase-branco text-verde-escuro font-semibold hover:bg-gray-200 transition-colors shadow-md border border-gray-300"
@@ -161,12 +227,15 @@ export function PacienteDetalhePage() {
   );
 }
 
-// Componente helper para os itens de informação
-function InfoItem({ label, value }: { label: string; value: string | number }) {
+// --- COMPONENTE HELPER ATUALIZADO ---
+// Agora 'value' aceita React.ReactNode (qualquer elemento JSX)
+function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="py-2 border-b border-gray-200">
+    // Usa flex para alinhar o label à esquerda e a badge à direita
+    <div className="py-3 border-b border-gray-200 flex justify-between items-center">
       <span className="font-semibold text-gray-600">{label}: </span>
-      <span className="text-gray-800">{value}</span>
+      {/* O 'value' agora pode ser um <span>, <p> ou a nossa badge colorida */}
+      {value}
     </div>
   );
 }

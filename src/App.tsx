@@ -7,7 +7,7 @@ import { PacientesProvider } from "./context/PacienteContext"
 import { DialogflowChat } from "./components/vitas"
 import { ConsultasProvider } from "./context/ConsultaContext"
 import { AuthProvider } from "./context/AuthContext"
-import { TestesProvider } from "./context/TesteContext" // <-- IMPORTAR NOVO PROVIDER
+import { TestesProvider } from "./context/TesteContext" 
 
 function App() {
 
@@ -52,14 +52,17 @@ return (
       <AuthProvider>
         <PacientesProvider>
           <ConsultasProvider>
-            <TestesProvider> {/* <-- ENVOLVER COM O NOVO PROVIDER */}
+            <TestesProvider> 
               <DialogflowChat />
               <Suspense fallback={<Loading />}>
                 <Routes>
                   <Route>
-                    <Route index element={<PacientesPage />} />
+                    {/* --- CORREÇÃO AQUI --- */}
+                    <Route index element={<Home />} /> {/* Página inicial agora é Home */}
+                    <Route path="/" element={<Home />} /> {/* Página inicial agora é Home */}
+                    {/* ------------------- */}
+
                     <Route path="/integrantes" element={<Integrantes />} />
-                    <Route path="/" element={<PacientesPage />} />
                     <Route path="/contato" element={<Contato />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/cadastrar" element={<SignUp />} />
@@ -69,7 +72,8 @@ return (
                     
                     <Route path="/about" element={<About />} />
                     
-                    <Route path="/pacientes" element={<PacientesPage />} />
+                    {/* A rota /pacientes continua correta */}
+                    <Route path="/pacientes" element={<PacientesPage />} /> 
 
                     <Route path="/consultas/cadastro" element={<CadastroConsultaPage />} /> 
 
@@ -77,7 +81,7 @@ return (
                   </Route>
                 </Routes>
               </Suspense>
-            </TestesProvider> {/* <-- FECHAR O PROVIDER */}
+            </TestesProvider>
           </ConsultasProvider>
         </PacientesProvider> 
       </AuthProvider>
