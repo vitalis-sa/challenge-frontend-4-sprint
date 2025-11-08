@@ -6,7 +6,6 @@ const UPLOAD_TEST_URL = 'https://httpbin.org/post'; // endpoint público para si
 
 export default function NetworkTest({
   onFinish,
-  onNext,
 }: {
   onFinish: (result: {
     downloadMbps: number,
@@ -14,7 +13,6 @@ export default function NetworkTest({
     prepDuration: number,
     status: "success" | "failure"
   }) => void,
-  onNext: () => void
 }) {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -139,7 +137,6 @@ export default function NetworkTest({
                 <p className="text-red-500 mt-2">{networkError}</p>
                 <button
                   className="mt-6 bg-green-600 text-white rounded-full px-6 py-2 hover:bg-green-700 transition"
-                  onClick={onNext}
                 >
                   Ir para o próximo teste
                 </button>
@@ -160,9 +157,6 @@ export default function NetworkTest({
             <>
               <div className="w-full flex flex-col items-center mt-4">
                 <p className="text-green-900 font-bold mb-2">Teste de rede realizado!</p>
-                {preTestDuration !== null && (
-                  <p className="text-gray-700 mb-2">Tempo de preparação: {preTestDuration.toFixed(2)} segundos</p>
-                )}
                 {testDuration !== null && (
                   <p className="text-gray-700 mb-2">Duração do teste: {testDuration.toFixed(2)} segundos</p>
                 )}
