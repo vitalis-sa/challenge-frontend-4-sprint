@@ -24,20 +24,13 @@ export function Header() {
   const linksPacientePublico = [
     { to: "/", label: "Home" },
     { to: "/about", label: "Sobre" },
-    { to: "/integrantes", label: "Integrantes" },
-    { to: "/faq", label: "FAQ" },
-    { to: "/contato", label: "Contato" }
     // "Login" e "Teste" são tratados separadamente
   ];
 
   // Links do Paciente (quando LOGADO)
   const linksPacienteLogado = [
     { to: "/", label: "Home" },
-    { to: "/about", label: "Sobre" },
-    { to: "/integrantes", label: "Integrantes" },
-    { to: "/faq", label: "FAQ" },
-    { to: "/teste", label: "Teste" }, // "Teste" só aparece se logado
-    { to: "/contato", label: "Contato" }
+    { to: "/teste", label: "Teste" }
   ];
 
   // 5. Verifique se estamos na área do Médico
