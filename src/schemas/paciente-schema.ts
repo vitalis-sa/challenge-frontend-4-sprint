@@ -1,67 +1,70 @@
-// src/schemas/pacienteSchema.ts
 import { z } from "zod";
 
-// Baseado no PacienteDao (setParametrosPaciente)
+// 1. O SCHEMA FOI ATUALIZADO
 export const pacienteSchema = z.object({
-  // 1. NM_PACIENTE
-  nome: z
-    .string()
-    .min(2, "O nome deve ter no mínimo 2 caracteres")
-    .max(80, "O nome deve ter no máximo 80 caracteres"),
-
-  // 2. NR_CPF
+  nome: z.string().min(3, "Nome é obrigatório"),
   cpf: z
     .string()
-    .regex(/^\d{11}$/, "CPF deve conter 11 dígitos, sem pontos ou traços"),
-
-  // 3. DT_NASCIMENTO
+    .length(11, "CPF deve ter 11 dígitos")
+    .regex(/^[0-9]+$/, "CPF deve conter apenas números"),
   dataNascimento: z
     .string()
-    .min(10, "Data de nascimento é obrigatória") // "AAAA-MM-DD"
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "Formato de data inválido. Use AAAA-MM-DD")
-    .refine(
-      (dateStr) => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Zera a hora
-        return new Date(dateStr) < today;
-      },
-      { message: "A data de nascimento deve estar no passado" }
-    ),
+    .min(1, "Data de nascimento é obrigatória")
+    .refine((val) => !isNaN(Date.parse(val)), "Data inválida"),
 
-  // 4. FL_SEXO_BIOLOGICO
-  sexoBiologico: z.enum(["F", "M"], { message: "Selecione 'F' ou 'M'" }),
-
-  // 5. DS_ESCOLARIDADE
-  escolaridade: z
-    .string()
-    .min(1, "Escolaridade é obrigatória")
-    .max(40, "Escolaridade deve ter no máximo 40 caracteres"),
-
-  // 6. TP_DEFICIENCIA (VARCHAR - ex: "MOTORA", "SEM DEF")
-  deficiencia: z.enum(["NENHUMA", "MOTORA", "INTELECTUAL"], { 
-      message: "Selecione o tipo de deficiência" 
+  // --- CORRIGIDO ---
+  sexoBiologico: z.enum(["F", "M"], {
+    message: "Selecione o sexo",
   }),
 
-  // 7. DS_ACOMPANHANTE
-  dsAcompanhante: z.enum(["S", "N"], { message: "Selecione 'S' ou 'N'" }),
+  escolaridade: z.string().min(3, "Escolaridade é obrigatória"),
 
-  // 8. NR_CLASSIFICACAO (NUMBER 1,0 - Nullable)
-  classificacao: z
-    .number()
-    .int()
-    .min(1)
-    .max(5)
-    .optional()
-    .nullable(),
+  // --- CORRIGIDO ---
+  deficiencia: z.enum(["NENHUMA", "MOTORA", "INTELECTUAL"], {
+    message: "Selecione a deficiência",
+  }),
 
-  // 9. NR_PORCENTAGEM_FALTA (NUMBER 3,0 - Nullable)
-  nrPorcentagemFalta: z
-    .number()
-    .int()
-    .min(0)
-    .max(100)
-    .optional()
-    .nullable(),
+  // --- CORRIGIDO ---
+  dsAcompanhante: z.enum(["S", "N"], {
+    message: "Selecione se há acompanhante",
+  }),
+  
+  // --- CAMPOS DE TELEFONE ADICIONADOS AO FORMULÁRIO ---
+  telefoneNumero: z
+    .string()
+    .min(10, "Telefone deve ter 10 ou 11 dígitos (DDD + Número)")
+    .max(11, "Telefone deve ter 10 ou 11 dígitos")
+    .regex(/^[0-9]+$/, "Telefone deve conter apenas números"),
+  
+  // --- CORRIGIDO ---
+  telefoneTipo: z.enum(["Celular", "Residencial", "Comercial"], {
+    message: "Selecione o tipo de telefone",
+  }),
 });
 
+// Este tipo agora é inferido do schema atualizado (inclui telefoneNumero e telefoneTipo)
 export type PacienteFormData = z.infer<typeof pacienteSchema>;
+
+// --- 3. NOVOS TIPOS QUE REPRESENTAM O JSON DA API ---
+// (Estes são os DTOs do seu backend Java)
+
+// Representa o 'TelefoneDto' aninhado
+export interface TelefoneApiPayload {
+  ddi: number;
+  ddd: number;
+  numero: number;
+  tipo: string;
+  status: boolean;
+}
+
+// Representa o 'CadastroPacienteDto' (o JSON que a API espera)
+export interface PacienteApiPayload {
+  nome: string;
+  cpf: string;
+  dataNascimento: string;
+  sexoBiologico: string;
+  escolaridade: string;
+  deficiencia: string;
+  dsAcompanhante: string;
+  telefone: TelefoneApiPayload; // <-- O objeto aninhado
+}

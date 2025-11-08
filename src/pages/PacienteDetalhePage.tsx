@@ -1,15 +1,33 @@
 import { useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom"; // 1. Importar o Link
+import { Link, useParams } from "react-router-dom";
 import { Header } from "../components/header";
 import { Footer } from "../components/footer";
 import { Loading } from "../components/loading";
 import { ConsultaCard } from "../components/ConsultaCard";
 import { API_VITALIS } from "../api/vitalis-api";
-import type { Paciente } from "../types/paciente";
+// 1. IMPORTAR O TIPO 'Telefone' (você já fez isso)
+import type { Paciente, Telefone } from "../types/paciente";
 import type { Consulta } from "../types/consulta";
 
 // Endpoints da API
 const API_PACIENTES_ENDPOINT = `${API_VITALIS}/pacientes`;
+
+// --- 2. NOVA FUNÇÃO HELPER PARA FORMATAR O TELEFONE ---
+// Formata o objeto telefone (ex: "+55 (11) 98877-6655 (Celular)")
+function formatarTelefone(tel: Telefone | null | undefined): string {
+  if (!tel) {
+    return "Não cadastrado";
+  }
+  
+  // Formatação simples (ajuste se o 'numero' tiver 8 ou 9 dígitos)
+  const numStr = String(tel.numero);
+  const parte1 = numStr.length === 9 ? numStr.substring(0, 5) : numStr.substring(0, 4);
+  const parte2 = numStr.length === 9 ? numStr.substring(5) : numStr.substring(4);
+  
+  return `+${tel.ddi} (${tel.ddd}) ${parte1}-${parte2} [${tel.tipo}]`;
+}
+// --------------------------------------------------------
+
 
 export function PacienteDetalhePage() {
   // 1. Pega o 'id' da URL (ex: /pacientes/1)
@@ -101,36 +119,18 @@ export function PacienteDetalhePage() {
     timeZone: 'UTC'
   });
 
-  // --- NOVA FUNÇÃO 1: Lógica para a badge de Classificação ---
+  // --- (Função getClassificacaoBadge - permanece a mesma) ---
   const getClassificacaoBadge = (classificacao: number | null) => {
-    // Assume 3 (Neutro) se for nulo, como no seu backend
     const value = classificacao || 3; 
     let className = "bg-gray-100 text-gray-800";
     let text = `Neutro (${value})`;
-
     switch (value) {
-      case 1:
-        className = "bg-red-100 text-red-800";
-        text = `Muito Ruim (${value})`;
-        break;
-      case 2:
-        className = "bg-orange-100 text-orange-800";
-        text = `Ruim (${value})`;
-        break;
-      case 3:
-        // A classe/texto padrão já é "Neutro (3)"
-        break;
-      case 4:
-        className = "bg-green-100 text-green-800";
-        text = `Bom (${value})`;
-        break;
-      case 5:
-        className = "bg-blue-100 text-blue-800";
-        text = `Excelente (${value})`;
-        break;
+      case 1: className = "bg-red-100 text-red-800"; text = `Muito Ruim (${value})`; break;
+      case 2: className = "bg-orange-100 text-orange-800"; text = `Ruim (${value})`; break;
+      case 3: break;
+      case 4: className = "bg-green-100 text-green-800"; text = `Bom (${value})`; break;
+      case 5: className = "bg-blue-100 text-blue-800"; text = `Excelente (${value})`; break;
     }
-
-    // Retorna o JSX da badge
     return (
       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${className}`}>
         {text}
@@ -138,20 +138,18 @@ export function PacienteDetalhePage() {
     );
   };
 
-  // --- NOVA FUNÇÃO 2: Lógica para a badge de Probabilidade de Falta ---
+  // --- (Função getFaltaBadge - permanece a mesma) ---
   const getFaltaBadge = (porcentagem: number | null) => {
     const value = porcentagem || 0;
-    let className = "bg-green-100 text-green-800"; // Baixo (Bom)
+    let className = "bg-green-100 text-green-800"; 
     let text = `Baixa (${value}%)`;
-
     if (value > 33 && value <= 66) {
-      className = "bg-yellow-100 text-yellow-800"; // Média (Atenção)
+      className = "bg-yellow-100 text-yellow-800";
       text = `Média (${value}%)`;
     } else if (value > 66) {
-      className = "bg-red-100 text-red-800"; // Alta (Ruim)
+      className = "bg-red-100 text-red-800";
       text = `Alta (${value}%)`;
     }
-
     return (
       <span className={`px-3 py-1 text-sm font-semibold rounded-full ${className}`}>
         {text}
@@ -169,9 +167,15 @@ export function PacienteDetalhePage() {
         <section className="bg-white p-6 rounded-lg shadow-md mb-8">
           <h1 className="text-3xl font-bold text-roxo-escuro mb-4">{paciente.nome}</h1>
           
-          {/* --- GRID DE INFORMAÇÕES ATUALIZADA --- */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
             <InfoItem label="CPF" value={paciente.cpf} />
+            
+            {/* --- 3. CAMPO TELEFONE ADICIONADO E FORMATADO --- */}
+            <InfoItem 
+              label="Telefone" 
+              value={formatarTelefone(paciente.telefone)} 
+            />
+            
             <InfoItem label="Data de Nascimento" value={dataNascFormatada} />
             <InfoItem label="Gênero" value={paciente.genero === 'F' ? 'Feminino' : 'Masculino'} />
             <InfoItem label="Escolaridade" value={paciente.escolaridade} />
@@ -228,14 +232,18 @@ export function PacienteDetalhePage() {
 }
 
 // --- COMPONENTE HELPER ATUALIZADO ---
-// Agora 'value' aceita React.ReactNode (qualquer elemento JSX)
+// (Como você colou, esta versão é a correta)
 function InfoItem({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    // Usa flex para alinhar o label à esquerda e a badge à direita
+    // Usa flex para alinhar o label à esquerda e o valor à direita
     <div className="py-3 border-b border-gray-200 flex justify-between items-center">
       <span className="font-semibold text-gray-600">{label}: </span>
-      {/* O 'value' agora pode ser um <span>, <p> ou a nossa badge colorida */}
-      {value}
+      {/* O 'value' agora pode ser:
+        - Uma string (para CPF, Gênero, etc.)
+        - O JSX de uma badge (para Classificação)
+        - A string formatada pela nossa nova função 'formatarTelefone'
+      */}
+      <span className="text-gray-800 text-right">{value}</span>
     </div>
   );
 }

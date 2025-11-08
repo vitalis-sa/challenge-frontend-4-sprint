@@ -1,16 +1,16 @@
-// src/components/PacienteForm.tsx
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { usePacientes } from "../context/PacienteContext"; // Importa o hook do Paciente
+import { usePacientes } from "../context/PacienteContext";
 import {
   pacienteSchema,
   type PacienteFormData,
+  type PacienteApiPayload, // Importamos o novo tipo de Payload
 } from "../schemas/paciente-schema";
-import { useNavigate } from "react-router-dom"; // Para redirecionar após o cadastro
+import { useNavigate } from "react-router-dom";
 
 export function PacienteForm() {
   const { savePaciente } = usePacientes();
-  const navigate = useNavigate(); // Hook para navegação
+  const navigate = useNavigate();
 
   const {
     register,
@@ -21,23 +21,51 @@ export function PacienteForm() {
     resolver: zodResolver(pacienteSchema),
   });
 
+  // --- ONSUBMIT ATUALIZADO ---
+  // A 'data' que chega aqui é a do formulário (PacienteFormData)
   async function onSubmit(data: PacienteFormData): Promise<void> {
-    // A API (e o DTO) espera 'deficiencia' como string ("MOTORA", etc.)
-    // e 'classificacao'/'nrPorcentagemFalta' como números (ou null),
-    // o Zod schema já garante isso.
-    console.log("Objeto Paciente a ser enviado:", data);
+    
+    // --- 1. Lógica de Transformação ---
+    // Pegamos o "11987654321" e quebramos em DDD e Número
+    const ddd = data.telefoneNumero.substring(0, 2);
+    const numero = data.telefoneNumero.substring(2);
+
+    // Montamos o payload EXATAMENTE como o backend (Java DTO) espera
+    const apiPayload: PacienteApiPayload = {
+      nome: data.nome,
+      cpf: data.cpf,
+      dataNascimento: data.dataNascimento,
+      sexoBiologico: data.sexoBiologico,
+      escolaridade: data.escolaridade,
+      deficiencia: data.deficiencia,
+      dsAcompanhante: data.dsAcompanhante,
+      
+      // O objeto de telefone aninhado
+      telefone: {
+        ddi: 55, // Hardcoded para Brasil
+        ddd: parseInt(ddd),
+        numero: parseInt(numero),
+        tipo: data.telefoneTipo,
+        status: true // Hardcoded para Ativo
+      }
+    };
+    // ---------------------------------
+    
+    console.log("Objeto Paciente a ser enviado (API Payload):", apiPayload);
     try {
-      await savePaciente(data);
+      // 2. Enviamos o payload transformado para o contexto
+      await savePaciente(apiPayload); 
+      
       alert("Paciente cadastrado com sucesso!");
-      reset(); // Limpa o formulário
-      navigate("/pacientes"); // Redireciona para a lista de pacientes
+      reset(); 
+      navigate("/pacientes"); 
     } catch (error) {
       console.error("Erro ao cadastrar paciente:", error);
       alert("Erro ao cadastrar paciente. Tente novamente.");
     }
   }
 
-  // Estilo de classe base para os inputs (do seu SignUp.tsx)
+  // Estilos (mesmos)
   const inputBaseClass =
     "p-3 rounded-lg border text-base bg-quase-branco focus:outline-none focus:border-azul-principal";
   const inputErrorClass = "border-red-500 bg-red-100";
@@ -45,8 +73,10 @@ export function PacienteForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      {/* Nome */}
-      <label htmlFor="nome" className="font-semibold text-roxo-escuro">
+      {/* Nome, CPF, DataNascimento, Sexo, Escolaridade, Deficiencia, Acompanhante... */}
+      {/* (Todos os seus campos existentes permanecem aqui) */}
+       {/* Nome */}
+       <label htmlFor="nome" className="font-semibold text-roxo-escuro">
         Nome
       </label>
       <input
@@ -137,8 +167,8 @@ export function PacienteForm() {
         <p className="text-red-500 text-sm">{errors.escolaridade.message}</p>
       )}
 
-      {/* Deficiência (TP_DEFICIENCIA) */}
-<label htmlFor="deficiencia" className="font-semibold text-roxo-escuro">
+      {/* Deficiência */}
+    <label htmlFor="deficiencia" className="font-semibold text-roxo-escuro">
         Tipo de Deficiência
       </label>
       <select
@@ -152,7 +182,6 @@ export function PacienteForm() {
         <option value="" disabled>
           Selecione...
         </option>
-        {/* --- VALORES ATUALIZADOS (Nomes do Enum) --- */}
         <option value="NENHUMA">Nenhuma (Sem Def.)</option>
         <option value="MOTORA">Motora</option>
         <option value="INTELECTUAL">Intelectual</option>
@@ -161,7 +190,7 @@ export function PacienteForm() {
         <p className="text-red-500 text-sm">{errors.deficiencia.message}</p>
       )}
 
-      {/* Acompanhante (DS_ACOMPANHANTE) */}
+      {/* Acompanhante */}
       <label htmlFor="dsAcompanhante" className="font-semibold text-roxo-escuro">
         Possui Acompanhante?
       </label>
@@ -183,28 +212,47 @@ export function PacienteForm() {
         <p className="text-red-500 text-sm">{errors.dsAcompanhante.message}</p>
       )}
 
-      {/* Porcentagem Falta (NR_PORCENTAGEM_FALTA) - Opcional */}
-      <label
-        htmlFor="nrPorcentagemFalta"
-        className="font-semibold text-roxo-escuro"
-      >
-        Porcentagem de Falta (0-100, opcional)
+      {/* --- CAMPOS DE TELEFONE ADICIONADOS --- */}
+      
+      {/* Telefone (DDD + Número) */}
+      <label htmlFor="telefoneNumero" className="font-semibold text-roxo-escuro">
+        Telefone (DDD + Número, sem espaços)
       </label>
       <input
-        type="number"
-        id="nrPorcentagemFalta"
-        placeholder="Ex: 33"
-        min={0}
-        max={100}
+        type="tel"
+        id="telefoneNumero"
+        placeholder="11987654321"
+        maxLength={11}
         className={`${inputBaseClass} ${
-          errors.nrPorcentagemFalta ? inputErrorClass : inputValidClass
+          errors.telefoneNumero ? inputErrorClass : inputValidClass
         }`}
-        {...register("nrPorcentagemFalta", { valueAsNumber: true })}
+        {...register("telefoneNumero")}
       />
-      {errors.nrPorcentagemFalta && (
-        <p className="text-red-500 text-sm">
-          {errors.nrPorcentagemFalta.message}
-        </p>
+      {errors.telefoneNumero && (
+        <p className="text-red-500 text-sm">{errors.telefoneNumero.message}</p>
+      )}
+
+      {/* Tipo de Telefone */}
+      <label htmlFor="telefoneTipo" className="font-semibold text-roxo-escuro">
+        Tipo de Telefone
+      </label>
+      <select
+        id="telefoneTipo"
+        className={`${inputBaseClass} ${
+          errors.telefoneTipo ? inputErrorClass : inputValidClass
+        }`}
+        {...register("telefoneTipo")}
+        defaultValue=""
+      >
+        <option value="" disabled>
+          Selecione...
+        </option>
+        <option value="Celular">Celular</option>
+        <option value="Residencial">Residencial</option>
+        <option value="Comercial">Comercial</option>
+      </select>
+      {errors.telefoneTipo && (
+        <p className="text-red-500 text-sm">{errors.telefoneTipo.message}</p>
       )}
 
       {/* Botão */}

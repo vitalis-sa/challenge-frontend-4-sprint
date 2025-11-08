@@ -1,15 +1,26 @@
-import type { Deficiencia } from "./deficiencia";
-import type { genero } from "./genero";
+import type { Deficiencia } from "./deficiencia"; // (Seu tipo de deficiencia)
+import type { genero } from "./genero"; // (Seu tipo de genero)
 
+// 1. Defina o tipo para o objeto Telefone aninhado
+export interface Telefone {
+  ddi: number;
+  ddd: number;
+  numero: number;
+  tipo: string;
+  status: boolean;
+}
+
+// 2. Adicione o 'telefone' ao tipo Paciente
 export interface Paciente {
   id: number;
   nome: string;
   cpf: string;
-  dataNascimento: string; // O backend serializa LocalDate/Date para string (ex: "1990-10-20")
+  dataNascimento: string; 
   genero: genero;
   escolaridade: string;
-  classificacao: number | null; // O campo era Integer no DTO, então pode ser nulo
+  classificacao: number | null;
   deficiencia: Deficiencia;
-  dsAcompanhante:string
-  nrPorcentagemFalta: number
+  dsAcompanhante: string; // Adicionado 'dsAcompanhante'
+  nrPorcentagemFalta: number | null; // Adicionado 'nrPorcentagemFalta'
+  telefone: Telefone | null; // <-- ADICIONADO (Pode ser nulo se o LEFT JOIN falhar)
 }
