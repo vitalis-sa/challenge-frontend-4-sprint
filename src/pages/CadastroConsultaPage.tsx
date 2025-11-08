@@ -2,6 +2,7 @@ import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import { ConsultaForm } from "../components/ConsultaForm"; // Importa o novo formulário
 import "../index.css"; 
+import contactUs from "../assets/contact-us-animate.svg";
 
 export function CadastroConsultaPage() {
   return (
@@ -13,7 +14,7 @@ export function CadastroConsultaPage() {
           {/* Imagem (reutilizei a mesma) */}
           <div className="md:w-[45%] flex justify-center">
             <img
-              src="/src/assets/contact-us-animate.svg" 
+              src={contactUs}
               alt="Pessoa usando sistema"
               className="w-full h-auto max-h-[500px] object-contain rounded-xl"
             />

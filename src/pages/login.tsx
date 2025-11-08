@@ -7,6 +7,7 @@ import { loginSchema, type LoginFormData } from "../schemas/login-schema";
 import { useAuth } from "../context/AuthContext"; // <-- Importa o hook de Auth
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import loginImage from "../assets/login-animate.svg";
 
 export function Login() {
   const { login } = useAuth(); // <-- Pega a função de login
@@ -80,7 +81,7 @@ export function Login() {
           {/* Imagem à direita */}
           <div className="md:w-[55%] flex justify-center">
             <img
-              src="src/assets/login-animate.svg"
+              src={loginImage}
               alt="Pessoa fazendo login"
               className="w-full h-auto max-h-[500px] object-contain rounded-xl"
             />

@@ -2,6 +2,7 @@ import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import "../index.css";
 import { useState, type ChangeEvent, type FormEvent } from "react";
+import contactUS from "../assets/contact-us-animate.svg";
 
 interface ContactFormData {
   nome: string;
@@ -71,7 +72,7 @@ export function Contato() {
           {/* Imagem */}
           <div className="md:w-[45%] flex justify-center">
             <img
-              src="src/assets/contact-us-animate.svg"
+              src={contactUS}
               alt="Pessoa enviando mensagem"
               className="w-full h-auto max-h-[500px] object-contain rounded-xl"
             />
