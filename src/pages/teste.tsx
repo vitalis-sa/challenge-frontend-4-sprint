@@ -343,7 +343,7 @@ export function Teste() {
     try {
       await saveTeste(payload);
       alert("Resultados do teste salvos com sucesso!");
-      navigate("/pacientes"); // Opcional: redireciona para a lista
+      navigate("/"); // Opcional: redireciona para a lista
     } catch (error) {
       console.error("Erro ao salvar resultados do teste:", error);
       alert("Falha ao salvar os resultados. Tente novamente.");
