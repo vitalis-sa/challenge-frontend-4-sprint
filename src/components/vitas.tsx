@@ -15,8 +15,8 @@ export const DialogflowChat = () => {
     let scriptAlreadyPresent = !!script;
     if (!scriptAlreadyPresent) {
       script = document.createElement("script");
-      script.src = "https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js";
-      script.async = true;
+      (script as HTMLScriptElement).src = "https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js";
+      (script as HTMLScriptElement).async = true;
       document.body.appendChild(script);
     }
 
