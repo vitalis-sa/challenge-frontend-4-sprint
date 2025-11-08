@@ -270,7 +270,7 @@ export function Teste() {
     const analyser = analyserRef.current;
     const data = dataRef.current;
     if (!analyser || !data) { rafRef.current = requestAnimationFrame(drawLevel); return; }
-    analyser.getByteTimeDomainData(data);
+    analyser.getByteTimeDomainData(data as any);
     let sum = 0;
     for (let i = 0; i < data.length; i++) {
       const v = (data[i] - 128) / 128;
@@ -311,34 +311,35 @@ export function Teste() {
     URL.revokeObjectURL(url);
   }
 
-  // --- NOVA FUNÇÃO PARA SALVAR OS RESULTADOS ---
-  async function handleSalvarResultados() {
-    if (!user) {
-      alert("Erro: Paciente não está logado. Não é possível salvar.");
-      return;
-    }
+// --- FUNÇÃO DE SALVAR ATUALIZADA ---
+  async function handleSalvarResultados() {
+    if (!user) {
+      alert("Erro: Paciente não está logado. Não é possível salvar.");
+      return;
+    }
 
-    setIsSaving(true);
-    
+    setIsSaving(true);
+    
+    // --- CORREÇÃO AQUI ---
     // Mapeia o 'results' do frontend para o DTO do backend
-    const payload = {
-      idPaciente: user.id, // Adiciona o ID do paciente logado
-      
-      // Mapeia o objeto de conectividade (se existir)
-      connectivity: results.connectivity
-        ? { status: results.connectivity.status || "failure" }
-        : undefined,
-        
-      // Mapeia o objeto de câmera (se existir)
-      camera: results.camera
-        ? { status: results.camera.status || "failure" }
-        : undefined,
-        
-      // Mapeia o objeto de microfone (se existir)
-      mic: results.mic
-        ? { status: results.mic.status || "failure" }
-        : undefined,
-    };
+    // A lógica 'status === "success"' força o tipo a ser "success" | "failure"
+    // e trata "pending" (ou qualquer outro) como "failure".
+    const payload = {
+      idPaciente: user.id, // Adiciona o ID do paciente logado
+      
+      connectivity: results.connectivity
+        ? { status: results.connectivity.status === "success" ? "success" : "failure" }
+        : undefined,
+        
+      camera: results.camera
+        ? { status: results.camera.status === "success" ? "success" : "failure" }
+        : undefined,
+        
+      mic: results.mic
+        ? { status: results.mic.status === "success" ? "success" : "failure" }
+        : undefined,
+    };
+    // --- FIM DA CORREÇÃO ---
 
     try {
       await saveTeste(payload);
