@@ -3,6 +3,7 @@ import { Footer } from "../components/footer";
 import { Header } from "../components/header";
 import { PacienteForm } from "../components/pacienteForm"; // Importa o novo formulário
 import "../index.css"; // (Seu css global)
+import contactUs from "../assets/contact-us-animate.svg";
 
 export function SignUp() {
   return (
@@ -14,7 +15,7 @@ export function SignUp() {
           {/* Imagem */}
           <div className="md:w-[45%] flex justify-center">
             <img
-              src="/src/assets/contact-us-animate.svg" // (Mantive o path da sua imagem)
+              src={contactUs} // (Mantive o path da sua imagem)
               alt="Pessoa usando sistema"
               className="w-full h-auto max-h-[500px] object-contain rounded-xl"
             />
