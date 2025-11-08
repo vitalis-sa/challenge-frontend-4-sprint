@@ -312,7 +312,7 @@ export function Teste() {
   }
 
 // --- FUNÇÃO DE SALVAR ATUALIZADA ---
-  async function handleSalvarResultados() {
+ async function handleSalvarResultados() {
     if (!user) {
       alert("Erro: Paciente não está logado. Não é possível salvar.");
       return;
@@ -320,23 +320,22 @@ export function Teste() {
 
     setIsSaving(true);
     
-    // --- CORREÇÃO AQUI ---
-    // Mapeia o 'results' do frontend para o DTO do backend
-    // A lógica 'status === "success"' força o tipo a ser "success" | "failure"
-    // e trata "pending" (ou qualquer outro) como "failure".
     const payload = {
-      idPaciente: user.id, // Adiciona o ID do paciente logado
+      idPaciente: user.id, 
       
       connectivity: results.connectivity
-        ? { status: results.connectivity.status === "success" ? "success" : "failure" }
+        //                                                                                
+        ? { status: (results.connectivity.status === "success" ? "success" : "failure") as "success" | "failure" }
         : undefined,
         
       camera: results.camera
-        ? { status: results.camera.status === "success" ? "success" : "failure" }
+        //                                                                                
+        ? { status: (results.camera.status === "success" ? "success" : "failure") as "success" | "failure" }
         : undefined,
         
       mic: results.mic
-        ? { status: results.mic.status === "success" ? "success" : "failure" }
+        //                                                                               
+        ? { status: (results.mic.status === "success" ? "success" : "failure") as "success" | "failure" }
         : undefined,
     };
     // --- FIM DA CORREÇÃO ---
