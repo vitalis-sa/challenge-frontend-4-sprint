@@ -11,50 +11,27 @@ export function Header() {
   // 3. Pegar o usuário e a função de logout do Contexto
   const { user, logout } = useAuth();
 
-  // 4. Lógica de Links Aprimorada
-  
-  // Links da área do Médico (inalterado)
-  const linksMedico = [
-    { to: "/pacientes", label: "Pacientes" },
-    { to: "/cadastrar", label: "Cadastrar Paciente" },
+  const links = [
+    // Links Públicos/Paciente
+    { to: "/", label: "Home" },
+    { to: "/about", label: "Sobre" },
+    { to: "/integrantes", label: "Integrantes" },
+    { to: "/faq", label: "FAQ" },
+    { to: "/contato", label: "Contato" },
+    { to: "/teste", label: "Teste" }, // Link do Paciente
+    
+    // Links do Médico
+    { to: "/pacientes", label: "Pacientes" }, 
+    { to: "/cadastrar", label: "Cadastrar Paciente" }, 
     { to: "/consultas/cadastro", label: "Agendar Consulta" },
   ];
 
-  // Links do Paciente (quando NÃO logado)
-  const linksPacientePublico = [
-    { to: "/", label: "Home" },
-    { to: "/about", label: "Sobre" },
-    // "Login" e "Teste" são tratados separadamente
-  ];
-
-  // Links do Paciente (quando LOGADO)
-  const linksPacienteLogado = [
-    { to: "/", label: "Home" },
-    { to: "/teste", label: "Teste" }
-  ];
-
-  // 5. Verifique se estamos na área do Médico
-  const rotasMedico = ["/pacientes", "/cadastrar", "/consultas"];
-  const isAreaMedico = rotasMedico.some((rota) => 
-    location.pathname.startsWith(rota)
-  );
-
-  // 6. Decida qual conjunto de links usar
-  let links;
-  if (isAreaMedico) {
-    links = linksMedico;
-  } else if (user) { // Se está na área pública E logado
-    links = linksPacienteLogado;
-  } else { // Se está na área pública E deslogado
-    links = linksPacientePublico;
-  }
-
-  // 7. Função para fechar o menu mobile ao clicar
+  // 5. Função para fechar o menu mobile ao clicar
   const handleLinkClick = () => {
     setOpen(false);
   };
 
-  // 8. Função de Logout
+  // 6. Função de Logout
   const handleLogout = () => {
     logout(); // Limpa o contexto e localStorage
     handleLinkClick(); // Fecha o menu mobile
@@ -74,7 +51,7 @@ export function Header() {
 
       {/* --- MENU DESKTOP ATUALIZADO --- */}
       <div className="hidden md:flex gap-6 ml-auto items-center">
-        {/* Links Dinâmicos */}
+        {/* Links Dinâmicos (agora mostra todos) */}
         {links.map((link) => {
           const isActive = location.pathname === link.to;
           return (
@@ -90,33 +67,31 @@ export function Header() {
           );
         })}
 
-        {/* --- Lógica de Botão Login/Logout (Desktop) --- */}
-        {!isAreaMedico && ( // Só mostra login/logout na área do paciente
-          <div className="pl-4">
-            {user ? (
-              // Se ESTÁ logado
-              <div className="flex items-center gap-3">
-                <span className="text-amarelo-claro text-sm font-medium">
-                  Olá, {user.nome.split(' ')[0]}!
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="font-medium text-base bg-rosa-claro text-roxo-escuro px-3 py-1 rounded hover:opacity-80 transition-opacity"
-                >
-                  Sair
-                </button>
-              </div>
-            ) : (
-              // Se NÃO está logado
-              <Link
-                to="/login"
-                className="font-medium text-base bg-amarelo-claro text-roxo-escuro px-3 py-1 rounded hover:opacity-80 transition-opacity"
+        {/* --- Lógica de Botão Login/Logout (Sempre visível) --- */}
+        <div className="pl-4">
+          {user ? (
+            // Se ESTÁ logado
+            <div className="flex items-center gap-3">
+              <span className="text-amarelo-claro text-sm font-medium">
+                Olá, {user.nome.split(' ')[0]}!
+              </span>
+              <button
+                onClick={handleLogout}
+                className="font-medium text-base bg-rosa-claro text-roxo-escuro px-3 py-1 rounded hover:opacity-80 transition-opacity"
               >
-                Login
-              </Link>
-            )}
-          </div>
-        )}
+                Sair
+              </button>
+            </div>
+          ) : (
+            // Se NÃO está logado
+            <Link
+              to="/login"
+              className="font-medium text-base bg-amarelo-claro text-roxo-escuro px-3 py-1 rounded hover:opacity-80 transition-opacity"
+            >
+              Login
+            </Link>
+          )}
+        </div>
       </div>
 
       {/* Botão mobile */}
@@ -132,7 +107,6 @@ export function Header() {
           strokeWidth="3"
           viewBox="0 0 24 24"
         >
-          {/* Corrigindo o path do SVG que estava quebrado */}
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -166,33 +140,31 @@ export function Header() {
           })}
 
           {/* --- Lógica de Botão Login/Logout (Mobile) --- */}
-          {!isAreaMedico && (
-            <div className="mt-4 pt-4 border-t border-gray-700 w-full flex flex-col items-center gap-4 px-5">
-              {user ? (
-                // Se ESTÁ logado
-                <>
-                  <span className="text-amarelo-claro text-lg">
-                    Olá, {user.nome.split(' ')[0]}!
-                  </span>
-                  <button
-                    onClick={handleLogout}
-                    className="font-medium text-lg bg-rosa-claro text-roxo-escuro px-4 py-2 rounded w-full max-w-xs"
-                  >
-                    Sair
-                  </button>
-                </>
-              ) : (
-                // Se NÃO está logado
-                <Link
-                  to="/login"
-                  onClick={handleLinkClick}
-                  className="font-medium text-lg bg-amarelo-claro text-roxo-escuro px-4 py-2 rounded w-full max-w-xs text-center"
+          <div className="mt-4 pt-4 border-t border-gray-700 w-full flex flex-col items-center gap-4 px-5">
+            {user ? (
+              // Se ESTÁ logado
+              <>
+                <span className="text-amarelo-claro text-lg">
+                  Olá, {user.nome.split(' ')[0]}!
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="font-medium text-lg bg-rosa-claro text-roxo-escuro px-4 py-2 rounded w-full max-w-xs"
                 >
-                  Login
-                </Link>
-              )}
-            </div>
-          )}
+                  Sair
+                </button>
+              </>
+            ) : (
+              // Se NÃO está logado
+              <Link
+                to="/login"
+                onClick={handleLinkClick}
+                className="font-medium text-lg bg-amarelo-claro text-roxo-escuro px-4 py-2 rounded w-full max-w-xs text-center"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </div>
       )}
     </nav>
