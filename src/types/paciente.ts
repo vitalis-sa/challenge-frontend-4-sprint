@@ -1,7 +1,8 @@
-import type { Deficiencia } from "./deficiencia"; // (Seu tipo de deficiencia)
-import type { genero } from "./genero"; // (Seu tipo de genero)
+// (Estes são os tipos do ENUM do Java)
+export type Deficiencia = "NENHUMA" | "MOTORA" | "INTELECTUAL";
+export type Genero = "F" | "M";
 
-// 1. Defina o tipo para o objeto Telefone aninhado
+// Representa o 'TelefoneDto' do Java
 export interface Telefone {
   ddi: number;
   ddd: number;
@@ -10,17 +11,43 @@ export interface Telefone {
   status: boolean;
 }
 
-// 2. Adicione o 'telefone' ao tipo Paciente
+// Representa o 'TipoContato' do Java
+export interface TipoContato {
+  id: number;
+  nome: string;
+}
+
+// Representa o 'Contato' do Java
+export interface Contato {
+  idContato: number;
+  tipoContato: TipoContato; // Aninhado
+  ddi: number | null;
+  ddd: number | null;
+  numeroTelefone: number | null;
+}
+
+// Representa o 'Email' do Java
+export interface Email {
+  id: number;
+  endereco: string;
+  status: string; // "A" ou "I"
+}
+
+// Este é o tipo 'Paciente' completo que a API retorna
 export interface Paciente {
   id: number;
   nome: string;
   cpf: string;
   dataNascimento: string; 
-  genero: genero;
+  sexoBiologico: Genero; // Atualizado
   escolaridade: string;
   classificacao: number | null;
   deficiencia: Deficiencia;
-  dsAcompanhante: string; // Adicionado 'dsAcompanhante'
-  nrPorcentagemFalta: number | null; // Adicionado 'nrPorcentagemFalta'
-  telefone: Telefone | null; // <-- ADICIONADO (Pode ser nulo se o LEFT JOIN falhar)
+  dsAcompanhante: string;
+  nrPorcentagemFalta: number | null;
+  
+  // Objetos aninhados que vêm do backend
+  telefone: Telefone | null;
+  contato: Contato | null;
+  email: Email | null;
 }
