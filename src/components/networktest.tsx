@@ -1,15 +1,18 @@
-import React, { useRef, useState } from 'react';
-const TEST_DURATION = 30; // segundos
+import React, { useState } from 'react';
 
-const TEST_FILE_URL = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+const TEST_DURATION = 40; // segundos
+const TEST_FILE_URL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4';
+const UPLOAD_TEST_URL = 'https://httpbin.org/post'; // endpoint público para simular upload
 
-export default function NetworkTest({ onFinish }: {
+export default function NetworkTest({
+  onFinish,
+}: {
   onFinish: (result: {
     downloadMbps: number,
     uploadMbps: number,
     prepDuration: number,
     status: "success" | "failure"
-  }) => void
+  }) => void,
 }) {
   const [progress, setProgress] = useState(0);
   const [ready, setReady] = useState(false);
@@ -28,19 +31,26 @@ export default function NetworkTest({ onFinish }: {
     setTestDone(false);
     setPreTestDuration(null);
   };
+
   const handleStartTest = async () => {
-    setNetworkError('');
+    // Resetar estados de resultado antes de iniciar novo teste
+    setTestDone(false);
+    setPreTestDuration(null);
     setDownloadMbps(null);
     setUploadMbps(null);
+    setNetworkError('');
+    setProgress(0);
+    setTestDuration(null);
+
     setNetworkLoading(true);
+
     // Calcular tempo de preparação
     let prepDuration = null;
     if (timerStart) {
       prepDuration = (performance.now() - timerStart) / 1000;
       setPreTestDuration(prepDuration);
     }
-    setProgress(0);
-    setNetworkLoading(true);
+
     const startTime = performance.now();
     let running = true;
     const updateProgress = () => {
@@ -51,6 +61,7 @@ export default function NetworkTest({ onFinish }: {
       }
     };
     requestAnimationFrame(updateProgress);
+
     try {
       // Download test
       const startDownload = performance.now();
@@ -62,9 +73,8 @@ export default function NetworkTest({ onFinish }: {
       const mbps = ((sizeBytes * 8) / 1e6) / timeSec;
       setDownloadMbps(mbps.toFixed(2));
 
-      // Upload test (simulate by sending small blob)
-      const UPLOAD_TEST_URL = '/api/upload'; // ou URL completa se testar de outro domínio
-      const uploadData = new Uint8Array(100 * 1024); // 100KB
+      // Upload test (simulado, 5MB para melhor precisão)
+      const uploadData = new Uint8Array(5 * 1024 * 1024); // 5MB
       const startUpload = performance.now();
       await fetch(UPLOAD_TEST_URL, {
         method: 'POST',
@@ -79,6 +89,7 @@ export default function NetworkTest({ onFinish }: {
       setNetworkLoading(false);
       setTestDone(true);
       setProgress(100);
+      setTestDuration((performance.now() - startTime) / 1000);
     } catch (err) {
       running = false;
       setNetworkError('Erro ao testar a rede.');
@@ -87,6 +98,7 @@ export default function NetworkTest({ onFinish }: {
       setTestDone(true);
     }
   };
+
   // Barra de progresso
   const ProgressBar = ({ value }: { value: number }) => (
     <div style={{ width: '100%', height: '12px', background: '#eee', borderRadius: '8px', margin: '16px 0' }}>
@@ -106,11 +118,17 @@ export default function NetworkTest({ onFinish }: {
         </>
       ) : (
         <>
-          <button className="bg-green-900 text-white rounded-full px-6 py-2 mb-4 hover:bg-green-800 transition" onClick={handleStartTest} disabled={networkLoading}>
-            {networkLoading ? 'Testando...' : 'Começar Teste de Rede'}
+          <button
+            className="bg-green-900 text-white rounded-full px-6 py-2 mb-4 hover:bg-green-800 transition"
+            onClick={handleStartTest}
+            disabled={networkLoading}
+          >
+            {networkLoading ? 'Testando...' : 'Fazer teste de rede'}
           </button>
+
           {/* Barra de progresso durante o teste */}
-          {(!testDone && !networkError && !ready && !networkLoading) ? null : (networkLoading && !testDone) ? <ProgressBar value={progress} /> : null}
+          {networkLoading && !testDone && <ProgressBar value={progress} />}
+
           <div className="w-full flex flex-col items-center mt-2">
             {downloadMbps && (<p className="text-green-900">Download: {downloadMbps} Mbps</p>)}
             {uploadMbps && (<p className="text-green-900">Upload: {uploadMbps} Mbps</p>)}
@@ -119,15 +137,6 @@ export default function NetworkTest({ onFinish }: {
                 <p className="text-red-500 mt-2">{networkError}</p>
                 <button
                   className="mt-6 bg-green-600 text-white rounded-full px-6 py-2 hover:bg-green-700 transition"
-                  onClick={() => {
-                    setTestDone(false);
-                    onFinish({
-                      downloadMbps: 0,
-                      uploadMbps: 0,
-                      prepDuration: preTestDuration ?? 0,
-                      status: "failure"
-                    });
-                  }}
                 >
                   Ir para o próximo teste
                 </button>
@@ -135,21 +144,19 @@ export default function NetworkTest({ onFinish }: {
             )}
             {downloadMbps && uploadMbps && !networkError && (
               <div className="mt-4">
-                {parseFloat(downloadMbps) >= 25 && parseFloat(uploadMbps) >= 3 ? (
-                  <span className="font-bold">Conexão boa para videoconferência.</span>
+                {parseFloat(downloadMbps) >= 3 && parseFloat(uploadMbps) >= 3 ? (
+                  <span className="font-bold text-green-900">Conexão boa para videoconferência.</span>
                 ) : (
                   <span className="text-red-500 font-bold">Conexão abaixo do ideal para videoconferência.</span>
                 )}
               </div>
             )}
           </div>
+
           {testDone && !networkError && (
             <>
               <div className="w-full flex flex-col items-center mt-4">
                 <p className="text-green-900 font-bold mb-2">Teste de rede realizado!</p>
-                {preTestDuration !== null && (
-                  <p className="text-gray-700 mb-2">Tempo de preparação: {preTestDuration.toFixed(2)} segundos</p>
-                )}
                 {testDuration !== null && (
                   <p className="text-gray-700 mb-2">Duração do teste: {testDuration.toFixed(2)} segundos</p>
                 )}
@@ -157,15 +164,12 @@ export default function NetworkTest({ onFinish }: {
               <button
                 className="mt-6 bg-green-900 text-white rounded-full px-6 py-2 hover:bg-green-800 transition"
                 onClick={() => {
-                  setTestDone(false);
-                  if (preTestDuration !== null && downloadMbps && uploadMbps) {
-                    onFinish({
-                      downloadMbps: parseFloat(downloadMbps),
-                      uploadMbps: parseFloat(uploadMbps),
-                      prepDuration: preTestDuration,
-                      status: (parseFloat(downloadMbps) >= 25 && parseFloat(uploadMbps) >= 3) ? "success" : "failure"
-                    });
-                  }
+                  onFinish({
+                    downloadMbps: downloadMbps ? parseFloat(downloadMbps) : 0,
+                    uploadMbps: uploadMbps ? parseFloat(uploadMbps) : 0,
+                    prepDuration: preTestDuration ?? 0,
+                    status: (downloadMbps && parseFloat(downloadMbps) >= 3 && uploadMbps && parseFloat(uploadMbps) >= 3) ? "success" : "failure"
+                  });
                 }}
               >
                 Ir para o próximo teste

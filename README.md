@@ -1,100 +1,67 @@
-# Projeto Challenge Front-End 2º Semestre
+# 🏥 Atende+ (Grupo Vitalis) - Challenge Frontend 4ª Sprint
 
+Este é o repositório do projeto de frontend do **Atende+**, desenvolvido como parte do Challenge da 4ª Sprint. O projeto consiste em uma interface para pacientes realizarem testes de conectividade e para a administração hospitalar gerenciar pacientes e consultas.
 
-## Integrantes
+## 🧑‍💻 Integrantes
 
-- [Ana Flavia Camelo - RM561489](https://github.com/afcamelo)
-- [Gustavo Kenji Terada - RM562745](https://github.com/Gkenji110)
-- [João Guilherme Carvalho Novaes - RM566234](https://github.com/JoaoGuiNovaes)
+| Nome | RM |
+| :--- | :--- |
+| Ana Flavia Camelo | RM561489 |
+| Gustavo Kenji Terada | RM562745 |
+| João Guilherme Carvalho Novaes | RM566234 |
 
+---
 
-## Tecnologias
+## 🔗 Links
 
-* **Frontend:** React, TypeScript, Tailwind CSS
-* **Controle de versão:** Git / GitHub
+* **Repositório GitHub:** [https://github.com/vitalis-sa/challenge-frontend-4-sprint](https://github.com/vitalis-sa/challenge-frontend-4-sprint)
+* **Vídeo de Demonstração (YouTube):** [https://youtu.be/vJg8ABVXS5E](https://youtu.be/vJg8ABVXS5E)
 
-## Imagens e Ícones
+---
 
-<img src="src/assets/404-error.png" alt="404 error" width="300"/>
+## 🛠️ Tecnologias Utilizadas
 
-<img src="src/assets/anaflavia.jpeg" alt="Ana Flavia" width="200"/>
+O projeto foi construído com um ecossistema moderno baseado em **React**, utilizando as seguintes tecnologias:
 
-<img src="src/assets/atende+.png" alt="Atende+" width="250"/>
+* **React:** Biblioteca principal para a construção da interface do usuário.
+* **Vite:** Ferramenta de *build* e desenvolvimento local de alta performance.
+* **TypeScript:** Superset do JavaScript que adiciona tipagem estática ao código.
+* **Docker:** Utilizado para criar um ambiente containerizado para a aplicação.
+* **ESLint:** Ferramenta para linting e padronização do código.
+* **CSS:** Estilização padrão (através do `index.css`).
 
-<img src="src/assets/contact-us-animate.svg" alt="Contact Us" width="300"/>
+---
 
-<img src="src/assets/github.png" alt="GitHub" width="100"/>
+## 📂 Estrutura de Pastas do Projeto
 
-<img src="src/assets/gustavoterada.jpeg" alt="Gustavo Terada" width="200"/>
-
-<img src="src/assets/hospital-family-visit-animate.svg" alt="Hospital Family Visit" width="300"/>
-
-<img src="src/assets/joaoguilherme.jpeg" alt="João Guilherme" width="200"/>
-
-<img src="src/assets/linkedin.png" alt="LinkedIn" width="100"/>
-
-<img src="src/assets/login-animate.svg" alt="Login" width="300"/>
-
-<img src="src/assets/react.svg" alt="React" width="120"/>
-
-
-## Estrutura de pastas
-
+A organização do código-fonte (`/src`) segue a seguinte estrutura para modularidade e manutenção:
 <pre>
-CHALLENGER-FRONT-END-2-SEM/
-├── node_modules/
-├── public/
-│   ├── models/
-│   ├── chat-bot-animate.svg
-│   └── vite.svg
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── pages/
-│   ├── App.tsx
-│   ├── index.css
-│   ├── main.tsx
-│   └── vite-env.d.ts
-├── .gitignore
-├── eslint.config.js
-├── index.html
-├── package-lock.json
-├── package.json
-├── README.md
-├── tailwind.config.cjs
-├── tsconfig.app.json
-├── tsconfig.json
-├── tsconfig.node.json
-└── vite.config.ts
+src/ ├── api/ # Lógica de comunicação com a API (backend) ├── assets/ # Imagens, ícones e outros arquivos estáticos ├── components/ # Componentes React reutilizáveis ├── context/ # Contextos da aplicação (gerenciamento de estado) ├── pages/ # Componentes que representam as páginas da aplicação ├── schemas/ # Esquemas de validação de dados ├── types/ # Definições de tipos e interfaces TypeScript ├── App.tsx # Componente principal da aplicação ├── main.tsx # Arquivo de entrada (renderização do React) └── index.css # Estilos globais
 </pre>
 
-## Como Rodar
+## 🖼️ Imagens e Ícones
 
-1. Clone o repositório:
+O diretório `/src/assets` armazena os seguintes arquivos visuais utilizados no projeto:
 
-   ```bash
-   git clone https://github.com/ChallengeAnaGuJoao/Challenge-front-end-3-sprint/
-   ```
-2. Acesse a pasta do projeto:
+### Imagens e Animações
+| Imagem | Arquivo |
+| :---: | :--- |
+| <img src="./src/assets/atende+.png" alt="Logo Atende+" width="200"> | `atende+.png` |
+| <img src="./src/assets/login-animate.svg" alt="Animação Login" width="200"> | `login-animate.svg` |
+| <img src="./src/assets/hospital-family-visit-animate.svg" alt="Animação Visita" width="200"> | `hospital-family-visit-animate.svg` |
+| <img src="./src/assets/contact-us-animate.svg" alt="Animação Contato" width="200"> | `contact-us-animate.svg` |
+| <img src="./src/assets/404-error.png" alt="Erro 404" width="200"> | `404-error.png` |
 
-   ```bash
-   cd challenger-front-end-3-sprint
-   ```
-3. Instale as dependências:
+### Fotos da Equipe
+| Integrante | Arquivo |
+| :---: | :--- |
+| <img src="./src/assets/anaflavia.jpeg" alt="Foto Ana Flavia" width="150"> | `anaflavia.jpeg` |
+| <img src="./src/assets/gustavoterada.jpeg" alt="Foto Gustavo Terada" width="150"> | `gustavoterada.jpeg` |
+| <img src="./src/assets/joaoguilherme.jpeg" alt="Foto João Guilherme" width="150"> | `joaoguilherme.jpeg` |
 
-   ```bash
-   npm install
-   ```
-4. Execute o projeto em modo de desenvolvimento:
-
-   ```bash
-   npm run dev
-   ```
-5. Abra o navegador em `http://localhost:5173` (ou a porta mostrada no terminal).
-
-## Repositório
-
-* **GitHub:** [https://github.com/ChallengeAnaGuJoao/Challenge-front-end-3-sprint/](https://github.com/ChallengeAnaGuJoao/Challenge-front-end-3-sprint/)
-
-## Link youtube
-https://www.youtube.com/watch?v=vE1QPvJ8KHw
+### Ícones
+| Ícone | Arquivo |
+| :---: | :--- |
+| <img src="./src/assets/react.svg" alt="Ícone React" width="80"> | `react.svg` |
+| <img src="./src/assets/github.png" alt="Ícone GitHub" width="80"> | `github.png` |
+| <img src="./src/assets/linkedin.png" alt="Ícone LinkedIn" width="80"> | `linkedin.png` |
